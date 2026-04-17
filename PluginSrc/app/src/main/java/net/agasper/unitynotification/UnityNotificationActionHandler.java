@@ -15,14 +15,16 @@ import com.unity3d.player.UnityPlayerActivity;
 public class UnityNotificationActionHandler extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        int id = intent.getIntExtra("id", 0);
+        int notificationId = intent.getIntExtra("notificationId", 0);
         String gameObject = intent.getStringExtra("gameObject");
         String handlerMethod = intent.getStringExtra("handlerMethod");
         String actionId = intent.getStringExtra("actionId");
         boolean foreground = intent.getBooleanExtra("foreground", true);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(id);
+        if (notificationManager != null) {
+            notificationManager.cancel(notificationId);
+        }
 
         if (foreground) {
             Intent launchIntent = new Intent(context, UnityPlayerActivity.class);
