@@ -1,21 +1,13 @@
 apply plugin: 'com.android.library'
 
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdk 34
+    namespace 'net.agasper.unitynotification'
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -26,26 +18,19 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    // Keep support deps for legacy Unity/Gradle toolchains, but move notifications code to AndroidX.
-    // This avoids runtime crashes like NoClassDefFoundError: android/support/v4/app/TaskStackBuilder.
-    compile 'androidx.core:core:1.3.2'
-    compile 'com.android.support:appcompat-v7:26.0.2'
-    testCompile 'junit:junit:4.12'
-    compile files('libs/classes.jar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.core:core:1.12.0'
+    implementation files('libs/classes.jar')
 }
 
 task deleteOldJar(type: Delete) {
     delete 'release/notification.jar'
 }
 
-task exportJar(type: Copy) {
-    from('build/intermediates/bundles/release/classes.jar')
+task exportJar(type: Copy, dependsOn: [deleteOldJar, 'assembleRelease']) {
+    from(zipTree("build/outputs/aar/app-release.aar")) {
+        include 'classes.jar'
+    }
     into('release/')
     rename('classes.jar', 'notification.jar')
 }
-
-exportJar.dependsOn(deleteOldJar, build)
